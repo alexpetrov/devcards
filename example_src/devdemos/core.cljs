@@ -1,12 +1,13 @@
 (ns devdemos.core
   (:require
    [devcards.core :as dc :include-macros true]
-   [devcards.system :refer [IMount IUnMount IConfig]]   
+   [devcards.system :refer [IMount IUnMount IConfig]]
    [om.core :as om :include-macros true]
-   [om.dom :as dom :include-macros true]   
+   [om.dom :as dom :include-macros true]
    [clojure.string :as string]
    [sablono.core :as sab :include-macros true]
-   [devdemos.two-zero])
+   [devdemos.two-zero]
+   [datascript :as d])
   (:require-macros
    [devcards.core :refer [defcard is are= are-not= format-code format-data mkdn-code mkdn-data]]))
 
@@ -31,7 +32,7 @@
    (mkdn-code
     (defcard first-markdown-card
       (markdown-card "# This is a heading")))
-   
+
    "Devcards are designed to be written inline with your code during
     development. They are like advanced stateful `println`s that can
     hold almost any arbitrary functionality that you want." ))
@@ -59,8 +60,12 @@
 
 (defcard edn-card-example
   (dc/edn-card
+
    {:edn-card "This is an edn card"
-    :helpful? "It lets you quickly view EDN"}))
+    :helpful? "It lets you quickly view EDN"
+    :awesome "This is awesome!"
+    :nested {:id "id" :name "name"}
+    :verctor ["some" "stuff"]}))
 
 (defcard sablono-card-example
   (dc/sab-card
@@ -110,7 +115,7 @@
    { :initial-state {:count 30 } }))
 
 (defcard atom-sharing
-  (dc/markdown-card 
+  (dc/markdown-card
    "### Sharing an Atom
 
     If you pass an Atom as the `:initial-state` option to the
@@ -142,7 +147,7 @@
 
 (defcard om-intro
   (dc/markdown-card
-   "## Om 
+   "## Om
 
     The `om-root-card` will render Om components, much the way `om/root` does."))
 
@@ -186,6 +191,9 @@
 (defcard edn-card-shared
   (dc/edn-card om-test-atom))
 
+(defn foo []
+  (+ 1 2 4))
+
 (defcard test-card-ex
   (dc/test-card
    "## Test card
@@ -193,6 +201,7 @@
     Test cards allow arbitrary markdown in them, this can allow for a
     literate coding style"
    (is (= 23 (+ 21 2)))
+   (is (= 7 (foo)))
    (are= (+ 3 4 5) 12)
    "`(+ 3 4 5)` is definitely equal to `12`"
    (are-not= (+ 3 4 5) 12)))
@@ -392,3 +401,81 @@
 
 (defcard protocol-api-example
   (super-card {:text "cool cat"}))
+
+(defn datascript-demo-implicit-join []
+  (let [schema {:aka {:db/cardinality :db.cardinality/many}}
+        conn   (d/empty-db schema)]
+  (println "inside datascript demo implicit join. Schema: " schema "; Connection: " conn)
+    (d/transact! conn [ { :db/id -1
+                        :name  "Maksim"
+                        :age   45
+                        :aka   ["Maks Otto von Stirlitz", "Jack Ryan"] } ])
+  (println "inside datascript demo implicit join after transact. Schema: " schema "; Connection: " conn)
+
+
+  (d/q '[ :find  ?n ?a
+          :where [?e :aka "Maks Otto von Stirlitz"]
+                 [?e :name ?n]
+                 [?e :age  ?a] ]
+       @conn)))
+
+(defcard datascript-demo
+  (dc/markdown-card
+   "#DataScript demo"))
+
+(defn edn-f []
+  ["some stuff"])
+
+#_(defcard datascript-demo-edn-card
+  (dc/edn-card
+   (datascript-demo-implicit-join) ))
+
+
+
+(defn datascript-aggregates-demo []
+  (println "Gonna profile datascript-aggregates-demo")
+  (time (d/q '[ :find ?color (max ?amount ?x) (min ?amount ?x)
+        :in   [[?color ?x]] ?amount ]
+     [[:red 10]  [:red 20] [:red 30] [:red 40] [:red 50]
+      [:blue 7] [:blue 8]]
+     3)))
+
+(defn datascript-recursive-rule-demo []
+  (println "Gonna profile datascript-reqursive-rule-demo")
+  (time (d/q '[ :find  ?u1 ?u2
+        :in    $ %
+        :where (follows ?u1 ?u2) ]
+      [ [1 :follows 2]
+        [2 :follows 3]
+        [3 :follows 4] ]
+     '[ [(follows ?e1 ?e2)
+         [?e1 :follows ?e2]]
+        [(follows ?e1 ?e2)
+         [?e1 :follows ?t]
+         (follows ?t ?e2)] ])))
+
+(defcard datascript-demo-implicit-join-card
+  (dc/test-card
+   "## Test card
+    Test cards provide interactive testing inline with your code.
+    Test cards allow arbitrary markdown in them, this can allow for a
+    literate coding style"
+
+   (is (= #{ [:a 2] [:a 4] [:a 6] [:b 2] }
+(d/q '[ :find  ?k ?x
+        :in    [[?k [?min ?max]] ...] ?range
+        :where [(?range ?min ?max) [?x ...]]
+               [(even? ?x)] ]
+      { :a [1 7], :b [2 4] }
+      range)))
+
+   (is (= [[:red  [30 40 50] [10 20 30]]
+           [:blue [7 8] [7 8]]]  (datascript-aggregates-demo)))
+
+   (is (= #{[1 2] [1 3] [1 4]
+            [2 3] [2 4]
+            [3 4]} (datascript-recursive-rule-demo)))
+   (is (= 7 (foo)))
+   (are= (+ 3 4 5) 12)
+   "`(+ 3 4 5)` is definitely equal to `12`"
+   (are-not= (+ 3 4 5) 12)))

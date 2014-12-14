@@ -12,7 +12,8 @@
                  [jayq "2.5.1"]
                  [om "0.6.2"]
                  [frontier "0.1.0-SNAPSHOT"]
-                 [figwheel "0.1.4-SNAPSHOT"]]
+                 [figwheel "0.1.4-SNAPSHOT"]
+                 [datascript "0.6.0"]]
 
   :profiles {
              :dev {
@@ -20,10 +21,10 @@
                              [lein-figwheel "0.1.4-SNAPSHOT"]]
                    }
              }
-  
+
   :source-paths ["src"]
 
-  :cljsbuild { 
+  :cljsbuild {
     :builds [{:id "devcards-demos"
               :source-paths ["src" "example_src"]
               :compiler {
