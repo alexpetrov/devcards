@@ -153,7 +153,7 @@
 
 (defn widget [data owner]
   (om/component
-      (sab/html [:h2 "This is an om card, " (:text data)])))
+   (sab/html [:h2 "This is an om card, " (:text data)])))
 
 (defcard omcard-ex
   (dc/om-root-card widget {:text "yep it is"}))
@@ -232,34 +232,34 @@
      {}
      [:set-index-for-key {:k 0 :index 5}] {:keyed-vals {0 5}}
      [:set-index-for-key {:k 0 :index 3}] {:keyed-vals {0 3}}
-   [:set-index-for-key {:k 1 :index 3}] {:keyed-vals {0 3 1 3}}))
+     [:set-index-for-key {:k 1 :index 3}] {:keyed-vals {0 3 1 3}}))
 
 (defn css-transform [{:keys [rx ry rz tx ty tz]}]
   (let [trns (str "rotateX(" (or rx 0) "deg) "
-                             "rotateY(" (or ry 0) "deg) "
-                             "rotateZ(" (or rz 0) "deg) "
-                             "translateX(" (or tx 0) "px) "
-                             "translateY(" (or ty 0) "px) "
-                             "translateZ(" (or tz 0) "px) "
-                             )]
+                  "rotateY(" (or ry 0) "deg) "
+                  "rotateZ(" (or rz 0) "deg) "
+                  "translateX(" (or tx 0) "px) "
+                  "translateY(" (or ty 0) "px) "
+                  "translateZ(" (or tz 0) "px) "
+                  )]
     { "-webkit-transform" trns
       "transform" trns }))
 
 (defn side [trans side-css]
   [:div.side {:style (clj->js
                       (merge side-css
-                                (css-transform trans)))}])
+                             (css-transform trans)))}])
 
 (defn cube [{:keys [size cube-css side-css]}]
   (let [translate (/ size 2)
         base-side-css { :backgroundColor "green"
-                        :width  (str size "px")
-                        :height (str size "px")
-                        :position "absolute"
-                        :top "0px"}
+                       :width  (str size "px")
+                       :height (str size "px")
+                       :position "absolute"
+                       :top "0px"}
         base-cube-css { :width "100%"
-                        :height "100%"
-                        :-webkit-transform-style "preserve-3d"}
+                       :height "100%"
+                       :-webkit-transform-style "preserve-3d"}
         cube-css (merge base-cube-css cube-css)
         side-css (merge base-side-css side-css)]
     [:div.cube {:style (clj->js cube-css)}
@@ -278,9 +278,9 @@
    (cube { :size 200
           :cube-css (css-transform state)
           :side-css {  :width   "200px"
-                       :height  "200px"
-                       :opacity "0.5"
-                       :border "10px solid #333"}})])
+                     :height  "200px"
+                     :opacity "0.5"
+                     :border "10px solid #333"}})])
 
 (defcard threed-fun
   (dc/slider-card
@@ -307,8 +307,8 @@
    to-heckle-f
    ;; generator
    (fn [] (map vector
-              (repeatedly 30 #(rand-int 300))
-              (repeatedly 30 #(rand-int 300))))
+               (repeatedly 30 #(rand-int 300))
+               (repeatedly 30 #(rand-int 300))))
    :test-func (fn [args x] (< x 350))))
 
 
@@ -381,7 +381,7 @@
         IConfig
         (-options [_]
           { :unmount-on-reload false
-            :initial-state initial-state }))))
+           :initial-state initial-state }))))
    "You can then use the card like so:"
    (mkdn-code
     (defcard my-card-ex (super-card {})))))
@@ -397,7 +397,7 @@
     IConfig
     (-options [_]
       { :unmount-on-reload false
-        :initial-state initial-state })))
+       :initial-state initial-state })))
 
 (defcard protocol-api-example
   (super-card {:text "cool cat"}))
@@ -405,77 +405,74 @@
 (defn datascript-demo-implicit-join []
   (let [schema {:aka {:db/cardinality :db.cardinality/many}}
         conn   (d/empty-db schema)]
-  (println "inside datascript demo implicit join. Schema: " schema "; Connection: " conn)
+    (println "inside datascript demo implicit join. Schema: " schema "; Connection: " conn)
     (d/transact! conn [ { :db/id -1
-                        :name  "Maksim"
-                        :age   45
-                        :aka   ["Maks Otto von Stirlitz", "Jack Ryan"] } ])
-  (println "inside datascript demo implicit join after transact. Schema: " schema "; Connection: " conn)
+                         :name  "Maksim"
+                         :age   45
+                         :aka   ["Maks Otto von Stirlitz", "Jack Ryan"] } ])
+    (println "inside datascript demo implicit join after transact. Schema: " schema "; Connection: " conn)
 
 
-  (d/q '[ :find  ?n ?a
-          :where [?e :aka "Maks Otto von Stirlitz"]
-                 [?e :name ?n]
-                 [?e :age  ?a] ]
-       @conn)))
-
-(defcard datascript-demo
-  (dc/markdown-card
-   "#DataScript demo"))
+    (d/q '[ :find  ?n ?a
+           :where [?e :aka "Maks Otto von Stirlitz"]
+           [?e :name ?n]
+           [?e :age  ?a] ]
+         @conn)))
 
 (defn edn-f []
   ["some stuff"])
 
-#_(defcard datascript-demo-edn-card
-  (dc/edn-card
-   (datascript-demo-implicit-join) ))
-
-
-
 (defn datascript-aggregates-demo []
   (println "Gonna profile datascript-aggregates-demo")
   (time (d/q '[ :find ?color (max ?amount ?x) (min ?amount ?x)
-        :in   [[?color ?x]] ?amount ]
-     [[:red 10]  [:red 20] [:red 30] [:red 40] [:red 50]
-      [:blue 7] [:blue 8]]
-     3)))
+               :in   [[?color ?x]] ?amount ]
+             [[:red 10]  [:red 20] [:red 30] [:red 40] [:red 50]
+              [:blue 7] [:blue 8]]
+             3)))
 
 (defn datascript-recursive-rule-demo []
   (println "Gonna profile datascript-reqursive-rule-demo")
   (time (d/q '[ :find  ?u1 ?u2
-        :in    $ %
-        :where (follows ?u1 ?u2) ]
-      [ [1 :follows 2]
-        [2 :follows 3]
-        [3 :follows 4] ]
-     '[ [(follows ?e1 ?e2)
-         [?e1 :follows ?e2]]
-        [(follows ?e1 ?e2)
-         [?e1 :follows ?t]
-         (follows ?t ?e2)] ])))
+               :in    $ %
+               :where (follows ?u1 ?u2) ]
+             [ [1 :follows 2]
+               [2 :follows 3]
+               [3 :follows 4] ]
+             '[ [(follows ?e1 ?e2)
+                 [?e1 :follows ?e2]]
+                [(follows ?e1 ?e2)
+                 [?e1 :follows ?t]
+                 (follows ?t ?e2)] ])))
 
-(defcard datascript-demo-implicit-join-card
+(defcard datascript-demo
   (dc/test-card
-   "## Test card
-    Test cards provide interactive testing inline with your code.
-    Test cards allow arbitrary markdown in them, this can allow for a
-    literate coding style"
+   "## DataScript Demo"
 
-   (is (= #{ [:a 2] [:a 4] [:a 6] [:b 2] }
-(d/q '[ :find  ?k ?x
-        :in    [[?k [?min ?max]] ...] ?range
-        :where [(?range ?min ?max) [?x ...]]
-               [(even? ?x)] ]
-      { :a [1 7], :b [2 4] }
-      range)))
+   (mkdn-code
+    (defn datascript-recursive-rule-demo []
+      (d/q '[ :find  ?u1 ?u2
+                   :in    $ %
+                   :where (follows ?u1 ?u2) ]
+                 [ [1 :follows 2]
+                   [2 :follows 3]
+                   [3 :follows 4] ]
+                 '[ [(follows ?e1 ?e2)
+                     [?e1 :follows ?e2]]
+                    [(follows ?e1 ?e2)
+                     [?e1 :follows ?t]
+                     (follows ?t ?e2)] ])))
 
-   (is (= [[:red  [30 40 50] [10 20 30]]
-           [:blue [7 8] [7 8]]]  (datascript-aggregates-demo)))
+   (are= #{ [:a 2] [:a 4] [:a 6] [:b 2] }
+          (d/q '[ :find  ?k ?x
+                 :in    [[?k [?min ?max]] ...] ?range
+                 :where [(?range ?min ?max) [?x ...]]
+                 [(even? ?x)] ]
+               { :a [1 7], :b [2 4] }
+               range))
 
-   (is (= #{[1 2] [1 3] [1 4]
+   (are= [[:red  [30 40 50] [10 20 30]]
+           [:blue [7 8] [7 8]]]  (datascript-aggregates-demo))
+
+   (are= #{[1 2] [1 3] [1 4]
             [2 3] [2 4]
-            [3 4]} (datascript-recursive-rule-demo)))
-   (is (= 7 (foo)))
-   (are= (+ 3 4 5) 12)
-   "`(+ 3 4 5)` is definitely equal to `12`"
-   (are-not= (+ 3 4 5) 12)))
+            [3 4]} (datascript-recursive-rule-demo))))
